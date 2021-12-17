@@ -3,10 +3,14 @@ package com.davidarthurcole.bhb;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 
 public class Blend {
 
     private Blend(){}
+
+    //Instantiate a new random object
+    public static Random random = new Random(new Random().nextInt(Integer.MAX_VALUE));
 
     private static String padWithZeros(String inputString){
         return String.format("%1$" + 2 + "s", inputString).replace(' ', '0');
@@ -15,6 +19,15 @@ public class Blend {
     //Boolean is the hex valid; ie, does it contain any invalid chars, is it 6 chars, etc.
     public static boolean isHexOk(String hex){
         return(hex != null && hex.matches("^[a-fA-F0-9]+$") && hex.length() == 6);
+    }
+
+    //Generate a random hex string of length 6
+    public static String generateRandomHex(){
+        //New builder object
+        StringBuilder rndHex = new StringBuilder();
+        //Get a new random char from the string, 6 times
+        for (int i = 0; i < 6; i++) rndHex.append("0123456789ABCDEF".charAt(random.nextInt(16)));
+        return rndHex.toString();
     }
 
     public static List<Integer> findSplitLengths(String word, int numSplits){
@@ -79,11 +92,11 @@ public class Blend {
         return output.toString();
     }
 
-    public static String blendMain(int howManyCodes, String input, String[] codeArray, boolean rightJustified){
+    public static List<String> blendMain(int howManyCodes, String input, String[] codeArray, boolean rightJustified){
 
 
         //New builder
-        StringBuilder output = new StringBuilder();
+        List<String> returnList = new ArrayList<>();
         int codeIndex = 0;
         List<Integer> splitLengths = findSplitLengths(input, (howManyCodes - 1));
         String[] splits = determineSplits(rightJustified, splitLengths, input);
@@ -92,10 +105,10 @@ public class Blend {
             if(i != (splits.length -1)) splits[i] = splits[i] + splits[i + 1].substring(0, 1);
 
             String addendum = blendTwo(codeArray[codeIndex], codeArray[codeIndex + 1], splits[i]);
-            output.append(i != (splits.length - 1) ? addendum.substring(0, addendum.length() - 9) : addendum);;
+            returnList.add(i != (splits.length - 1) ? addendum.substring(0, addendum.length() - 9) : addendum);;
             codeIndex++;
         }
 
-        return output.toString();
+        return returnList;
     }
 }

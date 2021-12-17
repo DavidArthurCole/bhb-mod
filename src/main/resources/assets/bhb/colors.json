@@ -1,0 +1,114 @@
+{
+  "knowncolors": [
+    {
+      "name": "white",
+      "alias": "",
+      "hex": "FFFFFF"
+    },
+    {
+      "name": "black",
+      "alias": "",
+      "hex": "000000"
+    },
+    {
+      "name": "brown",
+      "alias": "",
+      "hex": "964B00"
+    },
+    {
+      "name": "darkbrown",
+      "alias": "dbrown",
+      "hex": "422A14"
+    },
+    {
+      "name": "lightgray",
+      "alias": "lgray",
+      "hex": "D3D3D3"
+    },
+    {
+      "name": "darkgray",
+      "alias": ["dgray"],
+      "hex": "282828"
+    },
+    {
+      "name": "gray",
+      "alias": "",
+      "hex": "808080"
+    },
+    {
+      "name": "pink",
+      "alias": "",
+      "hex": "EE00FF"
+    },
+    {
+      "name": "magenta",
+      "alias": "",
+      "hex": "BB00FF"
+    },
+    {
+      "name": "cyan",
+      "alias": "",
+      "hex": "00FFFF"
+    },
+    {
+      "name": "red",
+      "alias": "",
+      "hex": "FF0000"
+    },
+    {
+      "name": "lightred",
+      "alias": "lred",
+      "hex": "EE6655"
+    },
+    {
+      "name": "darkred",
+      "alias": "dred",
+      "hex": "991100"
+    },
+    {
+      "name": "orange",
+      "alias": "",
+      "hex": "FFAA00"
+    },
+    {
+      "name": "yellow",
+      "alias": "",
+      "hex": "FFFF00"
+    },
+    {
+      "name": "green",
+      "alias": "",
+      "hex": "009900"
+    },
+    {
+      "name": "lightgreen",
+      "alias": "lgreen",
+      "hex": "00FF00"
+    },
+    {
+      "name": "darkgreen",
+      "alias": "dgreen",
+      "hex": "009900"
+    },
+    {
+      "name": "lightblue",
+      "alias": "lblue",
+      "hex": "0077bb"
+    },
+    {
+      "name": "blue",
+      "alias": "",
+      "hex": "0033bb"
+    },
+    {
+      "name": "darkblue",
+      "alias": "",
+      "hex": "000077"
+    },
+    {
+      "name": "violet",
+      "alias": "purple",
+      "hex": "4400bb"
+    }
+  ]
+}

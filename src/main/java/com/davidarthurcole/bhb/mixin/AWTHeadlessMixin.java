@@ -1,6 +1,5 @@
 package com.davidarthurcole.bhb.mixin;
 
-import net.minecraft.client.gui.screen.TitleScreen;
 import net.minecraft.client.main.Main;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;

@@ -22,5 +22,5 @@ Downloads are available on the ["Releases" page](https://github.com/DavidArthurC
 ---
 ## Build Instructions
 - Download the source
-- Run `.\gradelw build`
+- Run `.\gradlew build`
 - Mod jar will be located at `~\build\libs\bhb\bhb-X.X.X.jar`
