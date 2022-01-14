@@ -64,13 +64,15 @@ public class Bhb implements ModInitializer {
     static void blendCommon(int numberOfCodes, String[] codesArray, CommandContext<FabricClientCommandSource> commandContext) {
         String input = StringArgumentType.getString(commandContext, "Input");
         List<String> blendStrings = Blend.blendMain(numberOfCodes, input, codesArray, true);
-        StringBuilder blendString = new StringBuilder("\247r\247f");
+        StringBuilder blendStringFormatted = new StringBuilder("\247r\247f");
+        StringBuilder blendString = new StringBuilder();
 
         for(String s : blendStrings){
             blendString.append(s);
+            blendStringFormatted.append(s);
         }
 
-        String returnString = "\247nBlended Name:\n\n" + blendString  + "\n\247a(Data copied to clipboard)";
+        String returnString = "\247nBlended Name:\n\n" + blendStringFormatted.toString()  + "\n\247a(Data copied to clipboard)";
         Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(blendString.toString()), null);
         commandContext.getSource().getPlayer().sendMessage(Text.of(returnString), false);
     }
@@ -93,6 +95,9 @@ public class Bhb implements ModInitializer {
                 returnMessage.append("&").append(codesArray[counter]).append(message.charAt(j));
                 returnMessageFormatted.append("\247").append(codesArray[counter]).append(message.charAt(j));
             }
+
+            //Account for the fact that spaces should not be colored
+            if(message.charAt(j) == ' ') counter--;
         }
 
         String returnString = "\247nColored Message:\n\n" + returnMessageFormatted  + "\n\247a(Data copied to clipboard)";
