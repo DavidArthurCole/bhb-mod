@@ -46,7 +46,7 @@ public class ConfigManager {
             if(!configFile.exists()) this.saveFile();
             else{
                 BufferedReader br = new BufferedReader(new FileReader(configFile));
-                JsonObject schemeJson = JsonParser.parseReader(br).getAsJsonObject();
+                JsonObject schemeJson = new JsonParser().parse(br).getAsJsonObject();
 
                 JsonArray jsonArray = schemeJson.get("schemes").getAsJsonArray();
 

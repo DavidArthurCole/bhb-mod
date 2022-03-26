@@ -36,7 +36,7 @@ public class Bhb implements ModInitializer {
     public static final Supplier<List<Color>> KNOWN_COLORS = Suppliers.memoize(() -> {
         List<Color> knownColorsList = new ArrayList<>();
         try{
-            JsonObject jsonObject =  JsonParser.parseReader(new InputStreamReader(MinecraftClient.getInstance().getResourceManager().getResource(new Identifier("bhb:colors.json")).getInputStream())).getAsJsonObject();
+            JsonObject jsonObject =  new JsonParser().parse(new InputStreamReader(MinecraftClient.getInstance().getResourceManager().getResource(new Identifier("bhb:colors.json")).getInputStream())).getAsJsonObject();
             JsonArray jsonArray = jsonObject.get("knowncolors").getAsJsonArray();
 
             for (JsonElement jsonElement : jsonArray) {
