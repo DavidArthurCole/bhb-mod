@@ -4,9 +4,9 @@ This [Fabric](https://fabricmc.net/) mod is an integrated **CLIENT-SIDE** implem
 
 ---
 ## Dependencies
-  - Minecraft `1.17.1`
-  - Fabric Loader >= `0.12.11`
-  - Fabric API >= `0.44.0+1.17`
+  - Minecraft `1.18.2`
+  - Fabric Loader >= `0.13.3`
+  - Fabric API >= `0.48.0+1.18.2`
 ---
 ## Documentation
 - `/help blend` in-game will provide a brief overview of the formatting:
