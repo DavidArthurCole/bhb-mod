@@ -2,8 +2,8 @@ package com.davidarthurcole.bhb;
 
 public class Color {
 
-    private String mainName;
-    private String alias;
+    private final String mainName;
+    private final String alias;
     public String hexCode;
 
     public Color(String mainName, String hexCode, String alias){

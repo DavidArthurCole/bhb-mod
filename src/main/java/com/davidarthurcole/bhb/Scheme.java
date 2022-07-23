@@ -1,25 +1,29 @@
 package com.davidarthurcole.bhb;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public class Scheme {
 
     private final String name;
-    private final String[] schemeCodes;
+    private final List<String> schemeCodes;
     private final int length;
+    private final SchemeType type;
 
-    public Scheme(String name, String[] codes){
+    public Scheme(String name, List<String> codes, SchemeType type){
         this.name = name;
-        this.schemeCodes = codes.clone();
-        this.length = schemeCodes.length;
+        this.schemeCodes = new ArrayList<>(codes);
+        this.length = schemeCodes.size();
+        this.type = type;
     }
 
     @Override
     public String toString(){
-        return("{S, Name:" + name + " Codes: " + Arrays.toString(schemeCodes) + "}");
+        return("{S, Name:" + name + " Codes: " + Arrays.toString(schemeCodes.toArray()) + "}");
     }
 
-    public String[] getSchemeCodes(){
+    public List<String> getSchemeCodes(){
         return schemeCodes;
     }
 

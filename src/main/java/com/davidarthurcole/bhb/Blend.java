@@ -79,32 +79,31 @@ public class Blend {
 
         //Loop through each step
         for(float j = 0; j <= (input.length() - 1); ++j){
-            output.append("&#"
-                    + (padWithZeros(Integer.toHexString(Integer.parseInt(hexOne.substring(0, 2),16) +
-                    (int)((j / (input.length() - 1)) * (Integer.parseInt(hexTwo.substring(0, 2),16) - Integer.parseInt(hexOne.substring(0, 2),16)))))
-                    + padWithZeros(Integer.toHexString(Integer.parseInt(hexOne.substring(2, 4),16) +
-                    (int)((j / (input.length() - 1)) * (Integer.parseInt(hexTwo.substring(2, 4),16) - Integer.parseInt(hexOne.substring(2, 4),16)))))
-                    + padWithZeros(Integer.toHexString(Integer.parseInt(hexOne.substring(4, 6),16) +
-                    (int)((j / (input.length() - 1)) * (Integer.parseInt(hexTwo.substring(4, 6),16) - Integer.parseInt(hexOne.substring(4, 6),16)))))).toUpperCase()
-                    + input.charAt((int)j));
+            output.append("&#").append((padWithZeros(Integer.toHexString(Integer.parseInt(hexOne.substring(0, 2), 16) +
+                    (int) ((j / (input.length() - 1)) * (Integer.parseInt(hexTwo.substring(0, 2), 16) - Integer.parseInt(hexOne.substring(0, 2), 16)))))
+                    + padWithZeros(Integer.toHexString(Integer.parseInt(hexOne.substring(2, 4), 16) +
+                    (int) ((j / (input.length() - 1)) * (Integer.parseInt(hexTwo.substring(2, 4), 16) - Integer.parseInt(hexOne.substring(2, 4), 16)))))
+                    + padWithZeros(Integer.toHexString(Integer.parseInt(hexOne.substring(4, 6), 16) +
+                    (int) ((j / (input.length() - 1)) * (Integer.parseInt(hexTwo.substring(4, 6), 16) - Integer.parseInt(hexOne.substring(4, 6), 16)))))).toUpperCase()).append(input.charAt((int) j));
         }
 
         return output.toString();
     }
 
-    public static List<String> blendMain(int howManyCodes, String input, String[] codeArray, boolean rightJustified){
-
+    public static List<String> blendMain(int howManyCodes, String input, List<String> codeArray, boolean rightJustified){
 
         //New builder
         List<String> returnList = new ArrayList<>();
         int codeIndex = 0;
         List<Integer> splitLengths = findSplitLengths(input, (howManyCodes - 1));
+
+        //Todo: morph to list
         String[] splits = determineSplits(rightJustified, splitLengths, input);
 
         for(int i = 0; i < splits.length; i++ ){
             if(i != (splits.length -1)) splits[i] = splits[i] + splits[i + 1].charAt(0);
 
-            String addendum = blendTwo(codeArray[codeIndex], codeArray[codeIndex + 1], splits[i]);
+            String addendum = blendTwo(codeArray.get(codeIndex), codeArray.get(codeIndex + 1), splits[i]);
             returnList.add(i != (splits.length - 1) ? addendum.substring(0, addendum.length() - 9) : addendum);
             codeIndex++;
         }

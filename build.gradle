@@ -1,5 +1,5 @@
 plugins {
-	id 'fabric-loom' version '0.10-SNAPSHOT'
+	id 'fabric-loom' version '0.12-SNAPSHOT'
 	id 'maven-publish'
 }
 
@@ -24,7 +24,7 @@ repositories {
 }
 
 dependencies {
-	implementation 'junit:junit:4.13.1'
+	implementation 'junit:junit:4.13.2'
 
 	// To change the versions see the gradle.properties file
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"

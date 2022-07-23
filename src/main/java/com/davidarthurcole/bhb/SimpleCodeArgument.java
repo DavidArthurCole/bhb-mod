@@ -6,7 +6,7 @@ import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
-import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
+import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 
 import java.util.Collection;
 
@@ -19,7 +19,6 @@ public class SimpleCodeArgument implements ArgumentType<String> {
     }
 
     public static String getString(final CommandContext<FabricClientCommandSource> context, final String name){
-        String argument = context.getArgument(name, String.class);
         return context.getArgument(name, String.class);
     }
 
