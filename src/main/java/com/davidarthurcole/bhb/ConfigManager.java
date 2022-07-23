@@ -11,12 +11,10 @@ public class ConfigManager {
     private File configFile;
     private final String ender;
     private List<Scheme> passBy;
-    private final SchemeType type;
 
-    public ConfigManager(String ender, List<Scheme> passBy, SchemeType type){
+    public ConfigManager(String ender, List<Scheme> passBy){
         this.passBy = passBy;
         this.ender = ender;
-        this.type = type;
     }
 
     public void prepareFile(){
@@ -59,7 +57,7 @@ public class ConfigManager {
                     JsonArray codesAsJson = scheme.get("codes").getAsJsonArray();
                     List<String> codesAsList = new ArrayList<>();
                     for(JsonElement s : codesAsJson) codesAsList.add(s.getAsString().replace("\"", ""));
-                    passBy.add(new Scheme(name, codesAsList, type));
+                    passBy.add(new Scheme(name, codesAsList));
                 }
             }
         }

@@ -9,13 +9,11 @@ public class Scheme {
     private final String name;
     private final List<String> schemeCodes;
     private final int length;
-    private final SchemeType type;
 
-    public Scheme(String name, List<String> codes, SchemeType type){
+    public Scheme(String name, List<String> codes){
         this.name = name;
         this.schemeCodes = new ArrayList<>(codes);
         this.length = schemeCodes.size();
-        this.type = type;
     }
 
     @Override

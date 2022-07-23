@@ -3,10 +3,8 @@ package com.davidarthurcole.bhb;
 import com.google.common.collect.ImmutableList;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;
-import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
-import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 
 import java.util.Collection;
 
@@ -16,10 +14,6 @@ public class SimpleCodeArgument implements ArgumentType<String> {
 
     public static SimpleCodeArgument code(){
         return new SimpleCodeArgument();
-    }
-
-    public static String getString(final CommandContext<FabricClientCommandSource> context, final String name){
-        return context.getArgument(name, String.class);
     }
 
     @Override

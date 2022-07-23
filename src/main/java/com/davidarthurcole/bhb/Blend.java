@@ -1,9 +1,6 @@
 package com.davidarthurcole.bhb;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 public class Blend {
 
@@ -59,13 +56,13 @@ public class Blend {
         return solution;
     }
 
-    public static String[] determineSplits(boolean rightJustified, List<Integer> splitLengths, String input){
+    public static List<String> determineSplits(boolean rightJustified, List<Integer> splitLengths, String input){
 
-        String[] result = new String[splitLengths.size()];
+        List<String> result = new ArrayList<>(splitLengths.size());
         if(rightJustified) Collections.reverse(splitLengths);
         int index = 0;
         for(int i = 0; i < splitLengths.size(); ++i){
-            result[i] = input.substring(index, index+splitLengths.get(i));
+            result.add(i, input.substring(index, index+splitLengths.get(i)));
             index+=splitLengths.get(i);
         }
 
@@ -97,14 +94,13 @@ public class Blend {
         int codeIndex = 0;
         List<Integer> splitLengths = findSplitLengths(input, (howManyCodes - 1));
 
-        //Todo: morph to list
-        String[] splits = determineSplits(rightJustified, splitLengths, input);
+        List<String> splits = determineSplits(rightJustified, splitLengths, input);
 
-        for(int i = 0; i < splits.length; i++ ){
-            if(i != (splits.length -1)) splits[i] = splits[i] + splits[i + 1].charAt(0);
+        for(int i = 0; i < splits.size(); i++ ){
+            if(i != (splits.size() -1)) splits.set(i, splits.get(i) + splits.get(i + 1).charAt(0));
 
-            String addendum = blendTwo(codeArray.get(codeIndex), codeArray.get(codeIndex + 1), splits[i]);
-            returnList.add(i != (splits.length - 1) ? addendum.substring(0, addendum.length() - 9) : addendum);
+            String addendum = blendTwo(codeArray.get(codeIndex), codeArray.get(codeIndex + 1), splits.get(i));
+            returnList.add(i != (splits.size() - 1) ? addendum.substring(0, addendum.length() - 9) : addendum);
             codeIndex++;
         }
 

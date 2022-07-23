@@ -27,12 +27,12 @@ public class Bhb implements ModInitializer {
 
     //BlendScheme control
     public static List<Scheme> loadedBlendSchemes = new ArrayList<>();
-    private final static ConfigManager BlendSchemeConfigManager = new ConfigManager("_blend_schemes.json", loadedBlendSchemes, SchemeType.BLEND);
+    private final static ConfigManager BlendSchemeConfigManager = new ConfigManager("_blend_schemes.json", loadedBlendSchemes);
     private static Scheme activeBlendScheme;
 
     //ColorScheme control
     public static List<Scheme> loadedColorSchemes = new ArrayList<>();
-    private final static ConfigManager ColorSchemeConfigManager = new ConfigManager("_color_schemes.json", loadedColorSchemes, SchemeType.COLOR);
+    private final static ConfigManager ColorSchemeConfigManager = new ConfigManager("_color_schemes.json", loadedColorSchemes);
     private static Scheme activeColorScheme;
 
     @Override
@@ -406,7 +406,7 @@ public class Bhb implements ModInitializer {
             }
         }
         List<String> codesArray = List.of(StringArgumentType.getString(commandContext, "Colors").split(""));
-        loadedColorSchemes.add(new Scheme(name, codesArray, SchemeType.COLOR));
+        loadedColorSchemes.add(new Scheme(name, codesArray));
         ColorSchemeConfigManager.saveFile();
         commandContext.getSource().getPlayer().sendMessage(Text.of("ColorScheme saved to file."), false);
         return 1;
@@ -430,11 +430,11 @@ public class Bhb implements ModInitializer {
         //Fill the list
         for(int cv = 0; cv <= 5; ++cv){
             if(numberOfCodes >= cv+1){
-                codesArray.set(cv, CodeArgument.getString(commandContext, "Color " + (cv + 1)));
+                codesArray.add(cv, CodeArgument.getString(commandContext, "Color " + (cv + 1)));
             }
         }
 
-        loadedBlendSchemes.add(new Scheme(name, codesArray, SchemeType.BLEND));
+        loadedBlendSchemes.add(new Scheme(name, codesArray));
         BlendSchemeConfigManager.saveFile();
 
         commandContext.getSource().getPlayer().sendMessage(Text.of("BlendScheme saved to file."), false);
@@ -519,15 +519,13 @@ public class Bhb implements ModInitializer {
 
     static int sendBlendedName(int numberOfCodes, CommandContext<FabricClientCommandSource> commandContext) {
 
-
         List<String> codesArray = new ArrayList<>(numberOfCodes);
 
         for(int cv = 0; cv <= 5; cv++){
             if(numberOfCodes >= cv+1){
-                codesArray.set(cv, CodeArgument.getString(commandContext, "Color " + cv + 1));
+                codesArray.add(cv, CodeArgument.getString(commandContext, "Color " + cv + 1));
             }
         }
-
 
         //Actual blending
         blendCommon(numberOfCodes, codesArray, commandContext);
