@@ -23,6 +23,10 @@ import java.util.function.Supplier;
 
 public class Bhb implements ModInitializer {
 
+    public enum SchemeType {
+        BLEND, COLOR
+    }
+
     public static final String MOD_ID = "bhb";
 
     //BlendScheme control
@@ -213,58 +217,35 @@ public class Bhb implements ModInitializer {
 
             //Dispatch the bhb:blendscheme command, and store it in a node for aliasing
             LiteralCommandNode<FabricClientCommandSource> blendschemeNode = dispatcher.register(ClientCommandManager.literal("bhb:blendscheme")
-                    .then(ClientCommandManager.literal("delete")
-                            .then(ClientCommandManager.argument("Scheme Name", StringArgumentType.string())
-                                    .executes(context -> deleteScheme(context, SchemeType.BLEND))))
+                .then(ClientCommandManager.literal("delete")
+                    .then(ClientCommandManager.argument("Scheme Name", StringArgumentType.string())
+                        .executes(context -> deleteScheme(context, SchemeType.BLEND))))
 
-                    .then(ClientCommandManager.literal("list")
-                            .executes(context -> listSchemes(context, SchemeType.BLEND)))
+                .then(ClientCommandManager.literal("list")
+                    .executes(context -> listSchemes(context, SchemeType.BLEND)))
 
-                    .then(ClientCommandManager.literal("load") //Load a blend from json
-                            .then(ClientCommandManager.argument("Scheme Name", StringArgumentType.string())
-                                    .executes(Bhb::loadBlendScheme)))
+                .then(ClientCommandManager.literal("load") //Load a blend from json
+                    .then(ClientCommandManager.argument("Scheme Name", StringArgumentType.string())
+                        .executes(Bhb::loadBlendScheme)))
 
-                    .then(ClientCommandManager.literal("save") //Save a blend to json
-                            .then(ClientCommandManager.literal("2")
-                                    .then(ClientCommandManager.argument("Color 1", CodeArgument.code())
-                                            .then(ClientCommandManager.argument("Color 2", CodeArgument.code())
-                                                    .then(ClientCommandManager.argument("Scheme Name", StringArgumentType.string())
-                                                            .executes(context -> saveBlendScheme(2, context))))))
-
-                            .then(ClientCommandManager.literal("3")
-                                    .then(ClientCommandManager.argument("Color 1", CodeArgument.code())
-                                            .then(ClientCommandManager.argument("Color 2", CodeArgument.code())
-                                                    .then(ClientCommandManager.argument("Color 3", CodeArgument.code())
-                                                            .then(ClientCommandManager.argument("Scheme Name", StringArgumentType.string())
-                                                                    .executes(context -> saveBlendScheme(3, context)))))))
-
-                            .then(ClientCommandManager.literal("4")
-                                    .then(ClientCommandManager.argument("Color 1", CodeArgument.code())
-                                            .then(ClientCommandManager.argument("Color 2", CodeArgument.code())
-                                                    .then(ClientCommandManager.argument("Color 3", CodeArgument.code())
-                                                            .then(ClientCommandManager.argument("Color 4", CodeArgument.code())
-                                                                    .then(ClientCommandManager.argument("Scheme Name", StringArgumentType.string())
-                                                                            .executes(context -> saveBlendScheme(4, context))))))))
-
-                            .then(ClientCommandManager.literal("5")
-                                    .then(ClientCommandManager.argument("Color 1", CodeArgument.code())
-                                            .then(ClientCommandManager.argument("Color 2", CodeArgument.code())
-                                                    .then(ClientCommandManager.argument("Color 3", CodeArgument.code())
-                                                            .then(ClientCommandManager.argument("Color 4", CodeArgument.code())
-                                                                    .then(ClientCommandManager.argument("Color 5", CodeArgument.code())
-                                                                            .then(ClientCommandManager.argument("Scheme Name", StringArgumentType.string())
-                                                                                    .executes(context -> saveBlendScheme(5, context)))))))))
-
-                            .then(ClientCommandManager.literal("6")
-                                    .then(ClientCommandManager.argument("Color 1", CodeArgument.code())
-                                            .then(ClientCommandManager.argument("Color 2", CodeArgument.code())
-                                                    .then(ClientCommandManager.argument("Color 3", CodeArgument.code())
-                                                            .then(ClientCommandManager.argument("Color 4", CodeArgument.code())
-                                                                    .then(ClientCommandManager.argument("Color 5", CodeArgument.code())
-                                                                            .then(ClientCommandManager.argument("Color 6", CodeArgument.code())
-                                                                                    .then(ClientCommandManager.argument("Scheme Name", StringArgumentType.string())
-                                                                                            .executes(context -> saveBlendScheme(6, context))))))))))
-                    ));
+                .then(ClientCommandManager.literal("save") //Save a blend to json
+                    .then(ClientCommandManager.argument("Scheme Name", StringArgumentType.string())
+                        .then(ClientCommandManager.argument("Color 1", CodeArgument.code())
+                            .then(ClientCommandManager.argument("Color 2", CodeArgument.code())
+                                .then(ClientCommandManager.argument("Color 3", CodeArgument.code())
+                                    .then(ClientCommandManager.argument("Color 4", CodeArgument.code())
+                                        .then(ClientCommandManager.argument("Color 5", CodeArgument.code())
+                                            .then(ClientCommandManager.argument("Color 6", CodeArgument.code())
+                                                    .executes(Bhb::saveBlendScheme))
+                                            .executes(Bhb::saveBlendScheme))
+                                        .executes(Bhb::saveBlendScheme))
+                                    .executes(Bhb::saveBlendScheme))
+                                .executes(Bhb::saveBlendScheme)
+                            )
+                        )
+                    )
+                )
+            );
 
             //Alias the bhb:blendscheme command to blendscheme and bs
             dispatcher.register(ClientCommandManager.literal("blendscheme").redirect(blendschemeNode));
@@ -278,49 +259,21 @@ public class Bhb implements ModInitializer {
 
             //Dispatch the bhb:blend command, and store it in a node for aliasing
             LiteralCommandNode<FabricClientCommandSource> blendNode = dispatcher.register(ClientCommandManager.literal("bhb:blend")
+                .then(ClientCommandManager.argument("Input", StringArgumentType.string())
                     .then(ClientCommandManager.literal("scheme")
-                            .then(ClientCommandManager.argument("Input", StringArgumentType.string())
-                                    .executes(Bhb::schemeBlendedName)))
-
-                    .then(ClientCommandManager.literal("2")
-                            .then(ClientCommandManager.argument("Color 1", CodeArgument.code())
-                                    .then(ClientCommandManager.argument("Color 2", CodeArgument.code())
-                                            .then(ClientCommandManager.argument("Input", StringArgumentType.string())
-                                                    .executes(context -> (sendBlendedName(2, context)))))))
-
-                    .then(ClientCommandManager.literal("3")
-                            .then(ClientCommandManager.argument("Color 1", CodeArgument.code())
-                                    .then(ClientCommandManager.argument("Color 2", CodeArgument.code())
-                                            .then(ClientCommandManager.argument("Color 3", CodeArgument.code())
-                                                    .then(ClientCommandManager.argument("Input", StringArgumentType.string())
-                                                            .executes(context -> (sendBlendedName(3, context))))))))
-
-                    .then(ClientCommandManager.literal("4")
-                            .then(ClientCommandManager.argument("Color 1", CodeArgument.code())
-                                    .then(ClientCommandManager.argument("Color 2", CodeArgument.code())
-                                            .then(ClientCommandManager.argument("Color 3", CodeArgument.code())
-                                                    .then(ClientCommandManager.argument("Color 4", CodeArgument.code())
-                                                            .then(ClientCommandManager.argument("Input", StringArgumentType.string())
-                                                                    .executes(context -> (sendBlendedName(4, context)))))))))
-
-                    .then(ClientCommandManager.literal("5")
-                            .then(ClientCommandManager.argument("Color 1", CodeArgument.code())
-                                    .then(ClientCommandManager.argument("Color 2", CodeArgument.code())
-                                            .then(ClientCommandManager.argument("Color 3", CodeArgument.code())
-                                                    .then(ClientCommandManager.argument("Color 4", CodeArgument.code())
-                                                            .then(ClientCommandManager.argument("Color 5", CodeArgument.code())
-                                                                    .then(ClientCommandManager.argument("Input", StringArgumentType.string())
-                                                                            .executes(context -> (sendBlendedName(5, context))))))))))
-
-                    .then(ClientCommandManager.literal("6")
-                            .then(ClientCommandManager.argument("Color 1", CodeArgument.code())
-                                    .then(ClientCommandManager.argument("Color 2", CodeArgument.code())
-                                            .then(ClientCommandManager.argument("Color 3", CodeArgument.code())
-                                                    .then(ClientCommandManager.argument("Color 4", CodeArgument.code())
-                                                            .then(ClientCommandManager.argument("Color 5", CodeArgument.code())
-                                                                    .then(ClientCommandManager.argument("Color 6", CodeArgument.code())
-                                                                            .then(ClientCommandManager.argument("Input", StringArgumentType.string())
-                                                                                    .executes(context -> (sendBlendedName(6, context))))))))))));
+                        .executes(Bhb::schemeBlendedName))
+                    .then(ClientCommandManager.argument("Color 1", CodeArgument.code())
+                        .then(ClientCommandManager.argument("Color 2", CodeArgument.code())
+                            .then(ClientCommandManager.argument("Color 3", CodeArgument.code())
+                                .then(ClientCommandManager.argument("Color 4", CodeArgument.code())
+                                    .then(ClientCommandManager.argument("Color 5", CodeArgument.code())
+                                        .then(ClientCommandManager.argument("Color 6", CodeArgument.code())
+                                                .executes(Bhb::sendBlendedName))
+                                        .executes(Bhb::sendBlendedName))
+                                    .executes(Bhb::sendBlendedName))
+                                .executes(Bhb::sendBlendedName))
+                            .executes(Bhb::sendBlendedName)
+            ))));
 
             //Alias the bhb:blend command to blend
             dispatcher.register(ClientCommandManager.literal("blend").redirect(blendNode));
@@ -366,10 +319,12 @@ public class Bhb implements ModInitializer {
 
             MutableText colors = Text.translatable("");
             List<String> codes = new ArrayList<>(s.getSchemeCodes());
-            for(String c : codes){
-                colors.append(Text.translatable(caller.equals(SchemeType.COLOR) ? "\247" + c + c.toLowerCase(Locale.ROOT)
-                        : Integer.toString(codes.indexOf(c) + 1)).setStyle(Style.EMPTY.withColor(java.awt.Color.decode("#" + c).getRGB())));
-                if(codes.indexOf(c) != (codes.size() - 1)) colors.append(Text.translatable(" "));
+
+            for(int i = 0; i < codes.size(); i++) {
+                String code = codes.get(i);
+                colors.append(Text.translatable(caller.equals(SchemeType.COLOR) ? "\247" + code + code.toLowerCase(Locale.ROOT)
+                        : Integer.toString(i + 1)).setStyle(Style.EMPTY.withColor(java.awt.Color.decode("#" + code).getRGB())));
+                if(i != codes.size() - 1) colors.append(Text.translatable(" "));
             }
             MutableText schemeColorInfo = Text.translatable(" \2477\247l(").append(colors).append("\2477\247l)");
             MutableText availableScheme = Text.translatable(s.getName()).append(schemeColorInfo).setStyle(Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND,  commandOnClick)));
@@ -412,7 +367,7 @@ public class Bhb implements ModInitializer {
         return 1;
     }
 
-    public static int saveBlendScheme(int numberOfCodes, CommandContext<FabricClientCommandSource> commandContext){
+    public static int saveBlendScheme(CommandContext<FabricClientCommandSource> commandContext){
 
         loadedBlendSchemes = BlendSchemeConfigManager.loadFile();
         List<Scheme> toList = new ArrayList<>(loadedBlendSchemes);
@@ -424,21 +379,26 @@ public class Bhb implements ModInitializer {
             }
         }
 
-        //Create a new list
-        List<String> codesArray = new ArrayList<>(numberOfCodes);
+        //Get the number of codes passed as an integer
+        for(int j = 1; j <= 6; ++j){
+            try{CodeArgument.getString(commandContext, "Color " + j);}
+            catch(Exception ex){
+                //Create a new list
+                List<String> codesArray = new ArrayList<>(j-1);
 
-        //Fill the list
-        for(int cv = 0; cv <= 5; ++cv){
-            if(numberOfCodes >= cv+1){
-                codesArray.add(cv, CodeArgument.getString(commandContext, "Color " + (cv + 1)));
+                //Fill the list
+                for(int cv = 0; cv <= 5; ++cv) if((j-1) >= cv+1) codesArray.add(cv, CodeArgument.getString(commandContext, "Color " + (cv + 1)));
+
+                loadedBlendSchemes.add(new Scheme(name, codesArray));
+                BlendSchemeConfigManager.saveFile();
+
+                commandContext.getSource().getPlayer().sendMessage(Text.of("BlendScheme saved to file."), false);
+                return 1;
             }
         }
 
-        loadedBlendSchemes.add(new Scheme(name, codesArray));
-        BlendSchemeConfigManager.saveFile();
-
-        commandContext.getSource().getPlayer().sendMessage(Text.of("BlendScheme saved to file."), false);
-        return 1;
+        //Shouldn't be reached
+        return 0;
     }
 
     static int loadColorScheme(CommandContext<FabricClientCommandSource> commandContext){
@@ -517,18 +477,26 @@ public class Bhb implements ModInitializer {
         }
     }
 
-    static int sendBlendedName(int numberOfCodes, CommandContext<FabricClientCommandSource> commandContext) {
+    static int sendBlendedName(CommandContext<FabricClientCommandSource> commandContext) {
 
-        List<String> codesArray = new ArrayList<>(numberOfCodes);
+        //Get the number of codes passed as an integer
+        for(int j = 1; j <= 6; ++j){
 
-        for(int cv = 0; cv <= 5; cv++){
-            if(numberOfCodes >= cv+1){
-                codesArray.add(cv, CodeArgument.getString(commandContext, "Color " + cv + 1));
+            try{CodeArgument.getString(commandContext, "Color " + j);}
+            catch(Exception ex){
+                List<String> codesArray = new ArrayList<>(j-1);
+
+                for(int cv = 0; cv <= 5; cv++){
+                    if((j-1) >= cv+1) codesArray.add(cv, CodeArgument.getString(commandContext, "Color " + (cv + 1)));
+                }
+
+                //Actual blending
+                blendCommon(j-1, codesArray, commandContext);
+                return 1;
             }
         }
 
-        //Actual blending
-        blendCommon(numberOfCodes, codesArray, commandContext);
-        return 1;
+        //Should never be reached
+        return 0;
     }
 }
