@@ -1,13 +1,7 @@
 # BHB Mod (Fabric)
 
-This [Fabric](https://fabricmc.net/) mod is an integrated **CLIENT-SIDE** implementation of [BHB](https://www.github.com/DavidArthurcole/bhb).  The mod is currently compatible with Minecraft 1.17.1.
+This [Fabric](https://fabricmc.net/) mod is an integrated **CLIENT-SIDE** implementation of [BHB](https://www.github.com/DavidArthurcole/bhb).  The mod is currently compatible with Minecraft 1.19.
 
----
-## Dependencies
-  - Minecraft `1.18.2`
-  - Fabric Loader >= `0.13.3`
-  - Fabric API >= `0.48.0+1.18.2`
----
 ## Documentation
 - `/help blend` in-game will provide a brief overview of the formatting:
   - `/blend [# of colors] [color 1] [color 2] [etc] ... [name]`
