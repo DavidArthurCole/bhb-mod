@@ -2,7 +2,10 @@ package com.davidarthurcole.bhb;
 
 import com.google.common.base.Suppliers;
 import com.google.gson.*;
+import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import net.fabricmc.api.ModInitializer;
@@ -23,10 +26,6 @@ import java.util.function.Supplier;
 
 public class Bhb implements ModInitializer {
 
-    public enum SchemeType {
-        BLEND, COLOR
-    }
-
     public static final String MOD_ID = "bhb";
 
     //BlendScheme control
@@ -38,6 +37,27 @@ public class Bhb implements ModInitializer {
     public static List<Scheme> loadedColorSchemes = new ArrayList<>();
     private final static ConfigManager ColorSchemeConfigManager = new ConfigManager("_color_schemes.json", loadedColorSchemes);
     private static Scheme activeColorScheme;
+
+    private static LiteralArgumentBuilder<FabricClientCommandSource> regLit(String str){return ClientCommandManager.literal(str);}
+    static RequiredArgumentBuilder<FabricClientCommandSource,String> regArg(String str, ArgumentType<String> type){return ClientCommandManager.argument(str, type);}
+
+    private final static LiteralArgumentBuilder<FabricClientCommandSource> delete = regLit("delete");
+    private final static LiteralArgumentBuilder<FabricClientCommandSource> list = regLit("list");
+    private final static LiteralArgumentBuilder<FabricClientCommandSource> save = regLit("save");
+    private final static LiteralArgumentBuilder<FabricClientCommandSource> load = regLit("load");
+    private final static LiteralArgumentBuilder<FabricClientCommandSource> colorLit = regLit("color");
+    private final static LiteralArgumentBuilder<FabricClientCommandSource> schemeLit = regLit("scheme");
+
+    private final static RequiredArgumentBuilder<FabricClientCommandSource,String> schemeNameArg = regArg("Scheme Name", StringArgumentType.string());
+    private final static RequiredArgumentBuilder<FabricClientCommandSource,String> colorsArg = regArg("Colors", StringArgumentType.string());
+    private final static RequiredArgumentBuilder<FabricClientCommandSource,String> inputArg = regArg("Input", StringArgumentType.string());
+
+    private final static RequiredArgumentBuilder<FabricClientCommandSource,String> c1 = regArg("Color 1", CodeArgument.code());
+    private final static RequiredArgumentBuilder<FabricClientCommandSource,String> c2 = regArg("Color 2", CodeArgument.code());
+    private final static RequiredArgumentBuilder<FabricClientCommandSource,String> c3 = regArg("Color 3", CodeArgument.code());
+    private final static RequiredArgumentBuilder<FabricClientCommandSource,String> c4 = regArg("Color 4", CodeArgument.code());
+    private final static RequiredArgumentBuilder<FabricClientCommandSource,String> c5 = regArg("Color 5", CodeArgument.code());
+    private final static RequiredArgumentBuilder<FabricClientCommandSource,String> c6 = regArg("Color 6", CodeArgument.code());
 
     @Override
     public void onInitialize() {
@@ -108,7 +128,6 @@ public class Bhb implements ModInitializer {
         Literals.removeAll(Collections.singleton(""));
 
         for(String l : Literals){
-
             System.out.println("[BHB] Compiling literal: " + l);
             //Create a new literal text object with only the character
             MutableText newLT = Text.translatable(Character.toString(l.charAt(7)));
@@ -118,8 +137,6 @@ public class Bhb implements ModInitializer {
             newLT.setStyle(Style.EMPTY.withColor(color.getRGB()));
             //Append the new literal text object to the compiled literal text object
             compiledLiteralText.append(newLT);
-
-
         }
 
         //Copy compiled name to clipboard
@@ -128,7 +145,11 @@ public class Bhb implements ModInitializer {
         commandContext.getSource().getPlayer().sendMessage(returnLiteralText, false);
     }
 
-    static void colorCommon(List<String> codesArray, CommandContext<FabricClientCommandSource> commandContext) {
+    static int colorCommon(List<String> codesArray, CommandContext<FabricClientCommandSource> commandContext) {
+
+        //Error catching
+        if(!SimpleCodeArgument.code().isOkayMinecraftColorCode(String.join("", codesArray))) return 0;
+
         StringBuilder returnMessageFormatted = new StringBuilder();
         StringBuilder returnMessage = new StringBuilder();
         String validChars = "0123456789abcdef ";
@@ -159,16 +180,15 @@ public class Bhb implements ModInitializer {
         String returnString = "\n\247nColored Message:\n\n" + returnMessageFormatted  + "\n\n\247a(Data copied to clipboard)\n";
         Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(returnMessage.toString()), null);
         commandContext.getSource().getPlayer().sendMessage(Text.of(returnString), false);
+        return 1;
     }
 
     static void initHelp(){
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
             //Dispatch the bhb:help command, and store it in a node for aliasing
             LiteralCommandNode<FabricClientCommandSource> helpNode =  dispatcher.register(ClientCommandManager.literal("bhb:help")
-                    .then(ClientCommandManager.literal("colors")
-                            .executes(Bhb::colorCodes)
-                            .then(ClientCommandManager.literal("copy")
-                                    .executes(Bhb::colorCodesCopy))));
+                .then(colorLit.executes(Bhb::colorCodes).then(ClientCommandManager.literal("copy").executes(Bhb::colorCodesCopy)))
+            );
         });
     }
 
@@ -176,112 +196,69 @@ public class Bhb implements ModInitializer {
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
             //Dispatch the bhb:colorscheme command, and store it in a node for aliasing
             LiteralCommandNode<FabricClientCommandSource> colorSchemeNode = dispatcher.register(ClientCommandManager.literal("bhb:colorscheme")
-                    .then(ClientCommandManager.literal("delete")
-                            .then(ClientCommandManager.argument("Scheme Name", StringArgumentType.string())
-                                    .executes(context -> deleteScheme(context, SchemeType.COLOR))))
-                    .then(ClientCommandManager.literal("list")
-                            .executes(context -> listSchemes(context, SchemeType.COLOR)))
-                    .then(ClientCommandManager.literal("load")
-                            .then(ClientCommandManager.argument("Scheme Name", StringArgumentType.string())
-                                    .executes(Bhb::loadColorScheme)))
-                    .then(ClientCommandManager.literal("save")
-                            .then(ClientCommandManager.argument("Colors", SimpleCodeArgument.code())
-                                    .then(ClientCommandManager.argument("Scheme Name", StringArgumentType.string())
-                                            .executes(Bhb::saveColorScheme)))));
+                .then(delete.then(schemeNameArg.executes(Bhb::deleteScheme)))
+                .then(list.executes(Bhb::listSchemes))
+                .then(load.then(schemeNameArg.executes(Bhb::loadColorScheme)))
+                .then(save.then(schemeNameArg.then(colorsArg.executes(Bhb::saveColorScheme))))
+            );
 
             //Alias the bhb:colorscheme command to colorscheme and cs
-            dispatcher.register(ClientCommandManager.literal("colorscheme").redirect(colorSchemeNode));
-            dispatcher.register(ClientCommandManager.literal("cs").redirect(colorSchemeNode));
+            dispatcher.register(regLit("colorscheme").redirect(colorSchemeNode));
+            dispatcher.register(regLit("cs").redirect(colorSchemeNode));
         });
     }
 
     static void initColor(){
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
             //Dispatch the bhb:color command, and store it in a node for aliasing
-            LiteralCommandNode<FabricClientCommandSource> colorNode = dispatcher.register(ClientCommandManager.literal("bhb:color")
-                    .then(ClientCommandManager.literal("scheme")
-                            .then(ClientCommandManager.argument("Input", StringArgumentType.string())
-                                    .executes(Bhb::schemeColoredMessage)))
-                    .then(ClientCommandManager.argument("Colors", SimpleCodeArgument.code())
-                            .then(ClientCommandManager.argument("Input", StringArgumentType.string())
-                                    .executes(Bhb::sendColorSchemedMessage))));
+            LiteralCommandNode<FabricClientCommandSource> colorNode = dispatcher.register(regLit("bhb:color")
+                .then(schemeLit.then(inputArg.executes(Bhb::schemeColoredMessage)))
+                .then(colorsArg.then(inputArg.executes(Bhb::sendColorSchemedMessage)))
+            );
 
             //Alias the bhb:color command to color
-            dispatcher.register(ClientCommandManager.literal("color").redirect(colorNode));
+            dispatcher.register(regLit("color").redirect(colorNode));
         });
     }
 
     static void initBlendScheme(){
-
-        ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
-
-            //Dispatch the bhb:blendscheme command, and store it in a node for aliasing
-            LiteralCommandNode<FabricClientCommandSource> blendschemeNode = dispatcher.register(ClientCommandManager.literal("bhb:blendscheme")
-                .then(ClientCommandManager.literal("delete")
-                    .then(ClientCommandManager.argument("Scheme Name", StringArgumentType.string())
-                        .executes(context -> deleteScheme(context, SchemeType.BLEND))))
-
-                .then(ClientCommandManager.literal("list")
-                    .executes(context -> listSchemes(context, SchemeType.BLEND)))
-
-                .then(ClientCommandManager.literal("load") //Load a blend from json
-                    .then(ClientCommandManager.argument("Scheme Name", StringArgumentType.string())
-                        .executes(Bhb::loadBlendScheme)))
-
-                .then(ClientCommandManager.literal("save") //Save a blend to json
-                    .then(ClientCommandManager.argument("Scheme Name", StringArgumentType.string())
-                        .then(ClientCommandManager.argument("Color 1", CodeArgument.code())
-                            .then(ClientCommandManager.argument("Color 2", CodeArgument.code())
-                                .then(ClientCommandManager.argument("Color 3", CodeArgument.code())
-                                    .then(ClientCommandManager.argument("Color 4", CodeArgument.code())
-                                        .then(ClientCommandManager.argument("Color 5", CodeArgument.code())
-                                            .then(ClientCommandManager.argument("Color 6", CodeArgument.code())
-                                                    .executes(Bhb::saveBlendScheme))
-                                            .executes(Bhb::saveBlendScheme))
-                                        .executes(Bhb::saveBlendScheme))
-                                    .executes(Bhb::saveBlendScheme))
-                                .executes(Bhb::saveBlendScheme)
-                            )
-                        )
-                    )
-                )
-            );
-
+        ClientCommandRegistrationCallback.EVENT.register(((dispatcher, registryAccess) -> {
+            LiteralCommandNode<FabricClientCommandSource> blendschemeNode = dispatcher.register(regLit("bhb:blendscheme")
+                .then(delete.then(schemeNameArg.executes(Bhb::deleteScheme)))
+                .then(list.executes(Bhb::listSchemes))
+                .then(load.then(schemeNameArg.executes(Bhb::loadBlendScheme)))
+                .then(save.then(schemeNameArg.then(c1.then(c2.then(c3.then(c4.then(c5.then(c6
+                    .executes(Bhb::saveBlendScheme))
+                    .executes(Bhb::saveBlendScheme))
+                    .executes(Bhb::saveBlendScheme))
+                    .executes(Bhb::saveBlendScheme))
+                    .executes(Bhb::saveBlendScheme))
+                ))));
             //Alias the bhb:blendscheme command to blendscheme and bs
-            dispatcher.register(ClientCommandManager.literal("blendscheme").redirect(blendschemeNode));
-            dispatcher.register(ClientCommandManager.literal("bs").redirect(blendschemeNode));
-        });
+            dispatcher.register(regLit("blendscheme").redirect(blendschemeNode));
+            dispatcher.register(regLit("bs").redirect(blendschemeNode));
+        }));
     }
 
     static void initBlend(){
-
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
-
             //Dispatch the bhb:blend command, and store it in a node for aliasing
-            LiteralCommandNode<FabricClientCommandSource> blendNode = dispatcher.register(ClientCommandManager.literal("bhb:blend")
-                .then(ClientCommandManager.argument("Input", StringArgumentType.string())
-                    .then(ClientCommandManager.literal("scheme")
-                        .executes(Bhb::schemeBlendedName))
-                    .then(ClientCommandManager.argument("Color 1", CodeArgument.code())
-                        .then(ClientCommandManager.argument("Color 2", CodeArgument.code())
-                            .then(ClientCommandManager.argument("Color 3", CodeArgument.code())
-                                .then(ClientCommandManager.argument("Color 4", CodeArgument.code())
-                                    .then(ClientCommandManager.argument("Color 5", CodeArgument.code())
-                                        .then(ClientCommandManager.argument("Color 6", CodeArgument.code())
-                                                .executes(Bhb::sendBlendedName))
-                                        .executes(Bhb::sendBlendedName))
-                                    .executes(Bhb::sendBlendedName))
-                                .executes(Bhb::sendBlendedName))
-                            .executes(Bhb::sendBlendedName)
-            ))));
-
+            LiteralCommandNode<FabricClientCommandSource> blendNode = dispatcher.register(regLit("bhb:blend")
+                .then(inputArg
+                    .then(schemeLit.executes(Bhb::schemeBlendedName))
+                    .then(c1.then(c2.then(c3.then(c4.then(c5.then(c6
+                        .executes(Bhb::sendBlendedName))
+                        .executes(Bhb::sendBlendedName))
+                        .executes(Bhb::sendBlendedName))
+                        .executes(Bhb::sendBlendedName))
+                        .executes(Bhb::sendBlendedName))
+                    )));
             //Alias the bhb:blend command to blend
-            dispatcher.register(ClientCommandManager.literal("blend").redirect(blendNode));
+            dispatcher.register(regLit("blend").redirect(blendNode));
         });
     }
 
     static int colorCodes(CommandContext<FabricClientCommandSource> commandContext){
-
         MutableText colors = Text.translatable("");
         for(String c : "0123456789abcdef".split("")) colors.append(Text.of("\247" + c + c.toLowerCase(Locale.ROOT)));
 
@@ -302,27 +279,30 @@ public class Bhb implements ModInitializer {
         return 0;
     }
 
-    protected static int listSchemes(CommandContext<FabricClientCommandSource> commandContext, SchemeType caller){
+    protected static int listSchemes(CommandContext<FabricClientCommandSource> commandContext){
 
-        List<Scheme> toList = (caller.equals(SchemeType.BLEND) ? BlendSchemeConfigManager.loadFile() : ColorSchemeConfigManager.loadFile());
+        //Whether the call was of Blend type
+        boolean isBlend = (commandContext.getInput().split(" ")[0].replace("bhb:", "").equalsIgnoreCase("blendscheme"));
 
-        if(caller.equals(SchemeType.BLEND)) System.out.println("Blend type caller");
+        List<Scheme> toList = (isBlend ? BlendSchemeConfigManager.loadFile() : ColorSchemeConfigManager.loadFile());
+
+        if(isBlend) System.out.println("Blend type caller");
         else System.out.println("Color type caller");
 
-        MutableText available = Text.translatable("\247e\247lAvailable " + (caller.equals(SchemeType.BLEND) ? "Blend" : "Color") +  " Schemes:\n\n");
+        MutableText available = Text.translatable("\247e\247lAvailable " + (isBlend ? "Blend" : "Color") +  " Schemes:\n\n");
         if(toList.size() == 0) {
-            commandContext.getSource().getPlayer().sendMessage(Text.of("No " + (caller.equals(SchemeType.BLEND) ? "Blend" : "Color") + "Schemes are available."), false);
+            commandContext.getSource().getPlayer().sendMessage(Text.of("No " + (isBlend ? "Blend" : "Color") + "Schemes are available."), false);
             return 0;
         }
         for(Scheme s : toList) {
-            String commandOnClick = (caller.equals(SchemeType.BLEND) ? "/bhb:blendscheme load " : "/bhb:colorscheme load ") + s.getName();
+            String commandOnClick = (isBlend ? "/bhb:blendscheme load " : "/bhb:colorscheme load ") + s.getName();
 
             MutableText colors = Text.translatable("");
             List<String> codes = new ArrayList<>(s.getSchemeCodes());
 
             for(int i = 0; i < codes.size(); i++) {
                 String code = codes.get(i);
-                colors.append(Text.translatable(caller.equals(SchemeType.COLOR) ? "\247" + code + code.toLowerCase(Locale.ROOT)
+                colors.append(Text.translatable(!isBlend ? "\247" + code + code.toLowerCase(Locale.ROOT)
                         : Integer.toString(i + 1)).setStyle(Style.EMPTY.withColor(java.awt.Color.decode("#" + code).getRGB())));
                 if(i != codes.size() - 1) colors.append(Text.translatable(" "));
             }
@@ -335,15 +315,17 @@ public class Bhb implements ModInitializer {
         return 1;
     }
 
-    public static int deleteScheme(CommandContext<FabricClientCommandSource> commandContext, SchemeType caller){
+    public static int deleteScheme(CommandContext<FabricClientCommandSource> commandContext){
+
+        boolean isBlend = (commandContext.getInput().split(" ")[0].replace("bhb:", "").equalsIgnoreCase("blendscheme"));
 
         String name = StringArgumentType.getString(commandContext, "Scheme Name");
         int returnVal;
 
-        if(caller.equals(SchemeType.BLEND)) returnVal = BlendSchemeConfigManager.deleteScheme(name);
+        if(isBlend) returnVal = BlendSchemeConfigManager.deleteScheme(name);
         else returnVal = ColorSchemeConfigManager.deleteScheme(name);
 
-        if(returnVal == 0) commandContext.getSource().getPlayer().sendMessage(Text.of("A " + (caller.equals(SchemeType.BLEND) ? "Blend" : "Color") + "Scheme with this name does not exist."), false);
+        if(returnVal == 0) commandContext.getSource().getPlayer().sendMessage(Text.of("A " + (isBlend ? "Blend" : "Color") + "Scheme with this name does not exist."), false);
         else commandContext.getSource().getPlayer().sendMessage(Text.of("Scheme '" + name +  "' deleted."), false);
 
         return returnVal;
@@ -379,15 +361,12 @@ public class Bhb implements ModInitializer {
             }
         }
 
-        //Get the number of codes passed as an integer
-        for(int j = 1; j <= 6; ++j){
-            try{CodeArgument.getString(commandContext, "Color " + j);}
-            catch(Exception ex){
-                //Create a new list
-                List<String> codesArray = new ArrayList<>(j-1);
+        List<String> codesArray = new ArrayList<>();
 
-                //Fill the list
-                for(int cv = 0; cv <= 5; ++cv) if((j-1) >= cv+1) codesArray.add(cv, CodeArgument.getString(commandContext, "Color " + (cv + 1)));
+        //Get the number of codes passed as an integer
+        for(int j = 0; j < 6; ++j){
+            try{codesArray.add(j, CodeArgument.getString(commandContext, "Color " + (j + 1)));}
+            catch(Exception ex){
 
                 loadedBlendSchemes.add(new Scheme(name, codesArray));
                 BlendSchemeConfigManager.saveFile();
@@ -396,7 +375,6 @@ public class Bhb implements ModInitializer {
                 return 1;
             }
         }
-
         //Shouldn't be reached
         return 0;
     }
@@ -453,50 +431,38 @@ public class Bhb implements ModInitializer {
         }
     }
 
+    static int sendBlendedName(CommandContext<FabricClientCommandSource> commandContext) {
+
+        List<String> codesArray = new ArrayList<>();
+
+        //Get the number of codes passed as an integer
+        for(int j = 0; j < 6; ++j){
+            try{codesArray.add(j, CodeArgument.getString(commandContext, "Color " + (j + 1)));}
+            catch(Exception ex){
+                //Actual blending
+                blendCommon(j-1, codesArray, commandContext);
+                return 1;
+            }
+        }
+        //Should never be reached
+        return 0;
+    }
+
     static int schemeColoredMessage(CommandContext<FabricClientCommandSource> commandContext){
         if(activeColorScheme == null){
             //If there is not an active scheme loaded, return an error
             commandContext.getSource().getPlayer().sendMessage(Text.of("No scheme loaded. Please use \247a/bhb:colorscheme load [Scheme Name] \247f to load a scheme."), false);
             return 0;
         }
-        else{
-            colorCommon(activeColorScheme.getSchemeCodes(), commandContext);
-            return 1;
-        }
+        //Do the coloring and send the message, return 1 as success
+        else return colorCommon(activeColorScheme.getSchemeCodes(), commandContext);
     }
 
     static int sendColorSchemedMessage(CommandContext<FabricClientCommandSource> commandContext){
-
+        //Get the string from the args
         String codesString = StringArgumentType.getString(commandContext, "Color Codes");
-        if(SimpleCodeArgument.code().isOkayMinecraftColorCode(codesString)){
-            colorCommon(List.of(codesString.split("")), commandContext);
-            return 1;
-        }
-        else{
-            return 0;
-        }
-    }
 
-    static int sendBlendedName(CommandContext<FabricClientCommandSource> commandContext) {
-
-        //Get the number of codes passed as an integer
-        for(int j = 1; j <= 6; ++j){
-
-            try{CodeArgument.getString(commandContext, "Color " + j);}
-            catch(Exception ex){
-                List<String> codesArray = new ArrayList<>(j-1);
-
-                for(int cv = 0; cv <= 5; cv++){
-                    if((j-1) >= cv+1) codesArray.add(cv, CodeArgument.getString(commandContext, "Color " + (cv + 1)));
-                }
-
-                //Actual blending
-                blendCommon(j-1, codesArray, commandContext);
-                return 1;
-            }
-        }
-
-        //Should never be reached
-        return 0;
+        //Do the coloring and send the message, return 1 as success
+        return colorCommon(List.of(codesString.split("")), commandContext);
     }
 }
