@@ -41,16 +41,21 @@ public class Bhb implements ModInitializer {
     private static LiteralArgumentBuilder<FabricClientCommandSource> regLit(String str){return ClientCommandManager.literal(str);}
     static RequiredArgumentBuilder<FabricClientCommandSource,String> regArg(String str, ArgumentType<String> type){return ClientCommandManager.argument(str, type);}
 
-    private final static LiteralArgumentBuilder<FabricClientCommandSource> delete = regLit("delete");
-    private final static LiteralArgumentBuilder<FabricClientCommandSource> list = regLit("list");
-    private final static LiteralArgumentBuilder<FabricClientCommandSource> save = regLit("save");
-    private final static LiteralArgumentBuilder<FabricClientCommandSource> load = regLit("load");
+    private final static LiteralArgumentBuilder<FabricClientCommandSource> deleteC = regLit("delete");
+    private final static LiteralArgumentBuilder<FabricClientCommandSource> deleteB = regLit("delete");
+    private final static LiteralArgumentBuilder<FabricClientCommandSource> listC = regLit("list");
+    private final static LiteralArgumentBuilder<FabricClientCommandSource> listB = regLit("list");
+    private final static LiteralArgumentBuilder<FabricClientCommandSource> saveC = regLit("save");
+    private final static LiteralArgumentBuilder<FabricClientCommandSource> saveB = regLit("save");
+    private final static LiteralArgumentBuilder<FabricClientCommandSource> loadC = regLit("load");
+    private final static LiteralArgumentBuilder<FabricClientCommandSource> loadB = regLit("load");
     private final static LiteralArgumentBuilder<FabricClientCommandSource> colorLit = regLit("color");
     private final static LiteralArgumentBuilder<FabricClientCommandSource> schemeLit = regLit("scheme");
 
     private final static RequiredArgumentBuilder<FabricClientCommandSource,String> schemeNameArg = regArg("Scheme Name", StringArgumentType.string());
     private final static RequiredArgumentBuilder<FabricClientCommandSource,String> colorsArg = regArg("Colors", StringArgumentType.string());
-    private final static RequiredArgumentBuilder<FabricClientCommandSource,String> inputArg = regArg("Input", StringArgumentType.string());
+    private final static RequiredArgumentBuilder<FabricClientCommandSource,String> inputArgB = regArg("Input", StringArgumentType.string());
+    private final static RequiredArgumentBuilder<FabricClientCommandSource,String> inputArgC = regArg("Input", StringArgumentType.string());
 
     private final static RequiredArgumentBuilder<FabricClientCommandSource,String> c1 = regArg("Color 1", CodeArgument.code());
     private final static RequiredArgumentBuilder<FabricClientCommandSource,String> c2 = regArg("Color 2", CodeArgument.code());
@@ -196,10 +201,10 @@ public class Bhb implements ModInitializer {
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
             //Dispatch the bhb:colorscheme command, and store it in a node for aliasing
             LiteralCommandNode<FabricClientCommandSource> colorSchemeNode = dispatcher.register(ClientCommandManager.literal("bhb:colorscheme")
-                .then(delete.then(schemeNameArg.executes(Bhb::deleteScheme)))
-                .then(list.executes(Bhb::listSchemes))
-                .then(load.then(schemeNameArg.executes(Bhb::loadColorScheme)))
-                .then(save.then(schemeNameArg.then(colorsArg.executes(Bhb::saveColorScheme))))
+                .then(deleteC.then(schemeNameArg.executes(Bhb::deleteScheme)))
+                .then(listC.executes(Bhb::listSchemes))
+                .then(loadC.then(schemeNameArg.executes(Bhb::loadColorScheme)))
+                .then(saveC.then(schemeNameArg.then(colorsArg.executes(Bhb::saveColorScheme))))
             );
 
             //Alias the bhb:colorscheme command to colorscheme and cs
@@ -212,8 +217,10 @@ public class Bhb implements ModInitializer {
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
             //Dispatch the bhb:color command, and store it in a node for aliasing
             LiteralCommandNode<FabricClientCommandSource> colorNode = dispatcher.register(regLit("bhb:color")
-                .then(schemeLit.then(inputArg.executes(Bhb::schemeColoredMessage)))
-                .then(colorsArg.then(inputArg.executes(Bhb::sendColorSchemedMessage)))
+                .then(inputArgC
+                        .then(schemeLit.executes(Bhb::schemeColoredMessage))
+                        .then(colorsArg.executes(Bhb::sendColorSchemedMessage))
+                )
             );
 
             //Alias the bhb:color command to color
@@ -224,10 +231,10 @@ public class Bhb implements ModInitializer {
     static void initBlendScheme(){
         ClientCommandRegistrationCallback.EVENT.register(((dispatcher, registryAccess) -> {
             LiteralCommandNode<FabricClientCommandSource> blendschemeNode = dispatcher.register(regLit("bhb:blendscheme")
-                .then(delete.then(schemeNameArg.executes(Bhb::deleteScheme)))
-                .then(list.executes(Bhb::listSchemes))
-                .then(load.then(schemeNameArg.executes(Bhb::loadBlendScheme)))
-                .then(save.then(schemeNameArg.then(c1.then(c2.then(c3.then(c4.then(c5.then(c6
+                .then(deleteB.then(schemeNameArg.executes(Bhb::deleteScheme)))
+                .then(listB.executes(Bhb::listSchemes))
+                .then(loadB.then(schemeNameArg.executes(Bhb::loadBlendScheme)))
+                .then(saveB.then(schemeNameArg.then(c1.then(c2.then(c3.then(c4.then(c5.then(c6
                     .executes(Bhb::saveBlendScheme))
                     .executes(Bhb::saveBlendScheme))
                     .executes(Bhb::saveBlendScheme))
@@ -244,7 +251,7 @@ public class Bhb implements ModInitializer {
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
             //Dispatch the bhb:blend command, and store it in a node for aliasing
             LiteralCommandNode<FabricClientCommandSource> blendNode = dispatcher.register(regLit("bhb:blend")
-                .then(inputArg
+                .then(inputArgB
                     .then(schemeLit.executes(Bhb::schemeBlendedName))
                     .then(c1.then(c2.then(c3.then(c4.then(c5.then(c6
                         .executes(Bhb::sendBlendedName))
@@ -387,7 +394,7 @@ public class Bhb implements ModInitializer {
             for(Scheme s : loadedColorSchemes){
                 if(s.getName().equals(StringArgumentType.getString(commandContext, "Scheme Name"))){
                     activeColorScheme = s;
-                    commandContext.getSource().getPlayer().sendMessage(Text.of("ColorScheme \"" + s.getName() + "\" loaded. Use \247a/color scheme [message] \247fto use it."), false);
+                    commandContext.getSource().getPlayer().sendMessage(Text.of("ColorScheme \"" + s.getName() + "\" loaded. Use \247a/color [message] scheme \247fto use it."), false);
                     return 1;
                 }
             }
@@ -405,7 +412,7 @@ public class Bhb implements ModInitializer {
             for(Scheme s : loadedBlendSchemes){
                 if(s.getName().equals(StringArgumentType.getString(commandContext, "Scheme Name"))){
                     activeBlendScheme = s;
-                    commandContext.getSource().getPlayer().sendMessage(Text.of("BlendScheme \"" + s.getName() + "\" loaded. Use \247a/blend scheme [nickname] \247fto use it."), false);
+                    commandContext.getSource().getPlayer().sendMessage(Text.of("BlendScheme \"" + s.getName() + "\" loaded. Use \247a/blend [nickname] scheme \247fto use it."), false);
                     return 1;
                 }
             }
