@@ -1,6 +1,6 @@
 # BHB Mod (Fabric)
 
-This [Fabric](https://fabricmc.net/) mod is an integrated **CLIENT-SIDE** implementation of [BHB](https://www.github.com/DavidArthurcole/bhb).  The mod is currently compatible with Minecraft 1.19.
+This [Fabric](https://fabricmc.net/) mod is an integrated **CLIENT-SIDE** implementation of [BHB](https://www.github.com/DavidArthurcole/bhb).  The mod is currently compatible with Minecraft 1.20.1 and below.
 
 ## Documentation
 - `/help blend` in-game will provide a brief overview of the formatting:
