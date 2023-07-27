@@ -20,6 +20,7 @@ repositories {
 	// for more information about repositories.
 	maven {
 		url = uri("https://storage.googleapis.com/devan-maven/")
+		url = uri("https://ueaj.dev/maven")
 	}
 }
 
@@ -39,7 +40,7 @@ dependencies {
 	testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
 
 	//Resource building during runtime
-	modImplementation("net.devtech:arrp:0.5.4")
+	modImplementation("net.devtech:arrp:0.6.7")
 }
 
 processResources {
